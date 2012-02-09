@@ -8,7 +8,9 @@
 #include "motors.h"
 
 //Configs
-//PGEC2
+//Reference p24FJ256GA110.h
+_CONFIG1(FWDTEN_OFF & ICS_PGx2 & COE_OFF  & BKBUG_OFF & GWRP_OFF & GCP_OFF & JTAGEN_OFF)
+_CONFIG2(POSCMOD_NONE & IOL1WAY_OFF & FNOSC_PRI)
 
 int main(void)
 {

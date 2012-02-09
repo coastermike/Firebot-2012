@@ -2,6 +2,10 @@
 #define MOTORS_H
 
 void initMotors();
+void enableMotor();
+void disableMotor();
+void setSpeed(unsigned char speed);
+void setSpeedDist(unsigned char speed, unsigned int dist);
 
 #define AIN1 PORTCbits.RC1
 #define AIN2 PORTEbits.RE7
