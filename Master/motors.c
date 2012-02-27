@@ -37,13 +37,38 @@ void initMotors()
 	_INT2IP = 0b101;
 	
 	//x2 PWM
+	RPOR13bits.RP26R = 18;
+	RPOR10bits.RP21R = 19;
+	OC1CON1 = 0;
+	OC1CON2 = 0;
+	OC1CON1bits.OCTSEL = 0b111;
+	OC1R = 0;			//duty cycle of 50%
+	OC1RS = 50000;			//period
+	OC1CON2bits.SYNCSEL = 0x1F;
+	OC1CON1bits.OCM = 0b110;	//PWM, no fault
 	
+	OC2CON1 = 0;
+	OC2CON2 = 0;
+	OC2CON1bits.OCTSEL = 0b111;
+	OC2R = 0;			//duty cycle of 50%
+	OC2RS = 50000;			//period
+	OC2CON2bits.SYNCSEL = 0x1F;
+	OC2CON1bits.OCM = 0b110;	//PWM, no fault
 }
 
 //enable, disable, setSpeed, setSpeedDist, etc
 void enableMotor()
 {
 	MOTORSTBY = 1;
+	Nop();
+	AIN1 = 0;
+	Nop();
+	AIN2 = 1;
+	Nop();
+	BIN1 = 1;
+	Nop();
+	BIN2 = 0;
+	Nop();
 }
 
 void disableMotor()
@@ -51,7 +76,7 @@ void disableMotor()
 	MOTORSTBY = 0;
 }
 
-void setSpeed(unsigned char speed)
+void setSpeed(unsigned char speedL, unsigned char speedR)
 {
 	
 }

@@ -2,6 +2,7 @@
 
 void initAnalog()
 {
+	AD1PCFGL = 0x00C3;
 	/*2-Light Rear
 	3-IR Right Rear
 	4-IR Left Rear

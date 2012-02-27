@@ -3,7 +3,7 @@
 
 unsigned int valveMS = 0;
 
-void __attribute__((interrupt, no_auto_psv)) _T4Interrupt (void)
+void __attribute__((interrupt, no_auto_psv)) _T2Interrupt (void)
 {
 	_T2IF = 0;
 	if(valveMS>0)
@@ -33,10 +33,13 @@ void activateValve(unsigned int ms)
 {
 	valve = 1;
 	valveMS = ms;
+	_T2IE = 1;
 }
 
 void disableValve()
 {
+	
+	_T2IE=0;
 	valve = 0;
 	valveMS = 0;
 }	
