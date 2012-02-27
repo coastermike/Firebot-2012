@@ -20,7 +20,7 @@ void initLED()
 	T1CONbits.TCKPS = 0b11;
 	T1CONbits.TCS = 0;
 	T1CONbits.TGATE = 0;
-	PR1 = 10000;//31250;
+	PR1 = 31250;
 	_T1IE = 1;
 	_T1IP = 3;
 }

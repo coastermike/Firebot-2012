@@ -4,8 +4,8 @@
 void initMotors();
 void enableMotor();
 void disableMotor();
-void setSpeed(unsigned char speedL, unsigned char speedR);
-void setSpeedDist(unsigned char speed, unsigned int dist);
+void setSpeed(int speedL, int speedR);
+void setSpeedDist(int speed, unsigned int dist);
 
 #define AIN1 PORTCbits.RC1
 #define AIN2 PORTEbits.RE7

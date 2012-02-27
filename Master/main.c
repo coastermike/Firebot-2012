@@ -12,6 +12,8 @@
 _CONFIG1(FWDTEN_OFF & ICS_PGx2 & COE_OFF  & BKBUG_OFF & GWRP_OFF & GCP_OFF & JTAGEN_OFF)
 _CONFIG2(POSCMOD_HS & IOL1WAY_OFF & FNOSC_PRI)
 
+unsigned int stateOfMarvin = 0;
+
 int main(void)
 {
 	initAnalog();
@@ -22,10 +24,19 @@ int main(void)
 	initValve();
 	initMotors();
 
-	activateValve(100);
 	enableMotor();
+	
 	while(1)
 	{
-
+		//waiting for start button
+		if(stateOfMarvin == 0 || stateOfMarvin == 1)
+		{
+			//look for sound start for 3seconds
+		}
+		//after start button
+		else if(stateOfMarvin == 2)
+		{
+			
+		}		
 	}
 }

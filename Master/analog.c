@@ -16,4 +16,8 @@ void initAnalog()
 	14-Light Front
 	15-IR Left Front
 	*/
+	
+	AD1CON2bits.VCFG = 0; //AVdd and AVss
+	AD1CON3bits.ADCS = 0b00000001; //2*TCY
+	
 }

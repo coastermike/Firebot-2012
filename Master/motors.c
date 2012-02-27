@@ -1,15 +1,16 @@
 #include <p24fj256ga110.h>
 #include "motors.h"
 
-unsigned int leftMM = 0, rightMM = 0;
-unsigned int leftCount = 0, rightCount = 0;
+unsigned int leftMM = 0, rightMM = 0;	//distance in mm
+unsigned int leftCount = 0, rightCount = 0;	//raw count from hall effects
 
+//left wheel
 void __attribute__((interrupt, no_auto_psv)) _INT1Interrupt (void)
 {
 	_INT1IF = 0;
 }
 
-//Right Bottom sensor
+//Right wheel
 void __attribute__((interrupt, no_auto_psv)) _INT2Interrupt (void)
 {
 	_INT2IF = 0;
@@ -33,8 +34,8 @@ void initMotors()
 	RPINR1bits.INT2R = 33;	//Right Encoder INT2 on RPI33
 	_INT1IE = 1;
 	_INT2IE = 1;
-	_INT1IP = 0b101;		//interrupt priority at 5
-	_INT2IP = 0b101;
+	_INT1IP = 5;		//interrupt priority at 5
+	_INT2IP = 5;
 	
 	//x2 PWM
 	RPOR13bits.RP26R = 18;
@@ -43,7 +44,7 @@ void initMotors()
 	OC1CON2 = 0;
 	OC1CON1bits.OCTSEL = 0b111;
 	OC1R = 0;			//duty cycle of 50%
-	OC1RS = 50000;			//period
+	OC1RS = 51000;			//period
 	OC1CON2bits.SYNCSEL = 0x1F;
 	OC1CON1bits.OCM = 0b110;	//PWM, no fault
 	
@@ -51,7 +52,7 @@ void initMotors()
 	OC2CON2 = 0;
 	OC2CON1bits.OCTSEL = 0b111;
 	OC2R = 0;			//duty cycle of 50%
-	OC2RS = 50000;			//period
+	OC2RS = 51000;			//period
 	OC2CON2bits.SYNCSEL = 0x1F;
 	OC2CON1bits.OCM = 0b110;	//PWM, no fault
 }
@@ -60,15 +61,6 @@ void initMotors()
 void enableMotor()
 {
 	MOTORSTBY = 1;
-	Nop();
-	AIN1 = 0;
-	Nop();
-	AIN2 = 1;
-	Nop();
-	BIN1 = 1;
-	Nop();
-	BIN2 = 0;
-	Nop();
 }
 
 void disableMotor()
@@ -76,12 +68,48 @@ void disableMotor()
 	MOTORSTBY = 0;
 }
 
-void setSpeed(unsigned char speedL, unsigned char speedR)
+void setSpeed(int speedL, int speedR)
 {
+	if(speedL == 0)
+	{
+		AIN1 = 0;
+		AIN2 = 0;
+		OC1R = 0;
+	}
+	else if(speedL > 0)
+	{
+		AIN1 = 0;
+		AIN2 = 1;
+		OC1R = speedL*200;
+	}
+	else if(speedL < 0)
+	{
+		AIN1 = 1;
+		AIN2 = 0;
+		OC1R = -speedL*200;
+	}
 	
+	if(speedR == 0)
+	{
+		BIN1 = 0;
+		BIN2 = 0;
+		OC2R = 0;
+	}
+	else if(speedR > 0)
+	{
+		BIN1 = 1;
+		BIN2 = 0;
+		OC2R = speedR*200;
+	}
+	else if(speedR < 0)
+	{
+		BIN1 = 0;
+		BIN2 = 1;
+		OC2R = -speedR*200;
+	}
 }
 
-void setSpeedDist(unsigned char speed, unsigned int dist)
+void setSpeedDist(int speed, unsigned int dist)
 {
 	
 }
