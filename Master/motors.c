@@ -4,15 +4,20 @@
 unsigned int leftMM = 0, rightMM = 0;	//distance in mm
 unsigned int leftCount = 0, rightCount = 0;	//raw count from hall effects
 
+//
+//1.25counts/mm, 4counts=5mm
+//
 //left wheel
 void __attribute__((interrupt, no_auto_psv)) _INT1Interrupt (void)
 {
+	leftCount++;
 	_INT1IF = 0;
 }
 
 //Right wheel
 void __attribute__((interrupt, no_auto_psv)) _INT2Interrupt (void)
 {
+	rightCount++;
 	_INT2IF = 0;
 }
 
@@ -28,10 +33,14 @@ void initMotors()
 	
 	TRISEbits.TRISE8 = 1;
 	TRISEbits.TRISE9 = 1;
+	_CN67PUE = 1;	//left pull up for hall effect
+	_CN66PUE = 1;	//right pull up for hall effect
 	
 	//INT1 and INT2
 	RPINR0bits.INT1R = 34;	//Left Encoder INT1 on RPI34
 	RPINR1bits.INT2R = 33;	//Right Encoder INT2 on RPI33
+	_INT1EP = 0;
+	_INT2EP = 0;
 	_INT1IE = 1;
 	_INT2IE = 1;
 	_INT1IP = 5;		//interrupt priority at 5
@@ -98,12 +107,14 @@ void setSpeed(int speedL, int speedR)
 	else if(speedR > 0)
 	{
 		BIN1 = 1;
+		Nop();
 		BIN2 = 0;
 		OC2R = speedR*200;
 	}
 	else if(speedR < 0)
 	{
 		BIN1 = 0;
+		Nop();
 		BIN2 = 1;
 		OC2R = -speedR*200;
 	}

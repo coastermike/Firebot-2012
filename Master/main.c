@@ -23,9 +23,8 @@ int main(void)
 	initI2C();
 	initValve();
 	initMotors();
-
-	enableMotor();
 	
+	AD1CON1bits.ASAM = 1;
 	while(1)
 	{
 		//waiting for start button
@@ -36,7 +35,8 @@ int main(void)
 		//after start button
 		else if(stateOfMarvin == 2)
 		{
-			
+			enableMotor();
+			setSpeed(255, 255);
 		}		
 	}
 }
