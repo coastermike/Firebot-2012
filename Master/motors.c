@@ -1,6 +1,8 @@
 #include <p24fj256ga110.h>
 #include "motors.h"
 
+#define COUNT_PER_MM 1.25
+
 unsigned int leftMM = 0, rightMM = 0;	//distance in mm
 unsigned int leftCount = 0, rightCount = 0;	//raw count from hall effects
 
