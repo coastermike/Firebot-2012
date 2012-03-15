@@ -54,7 +54,7 @@ void initMotors()
 	OC1CON1 = 0;
 	OC1CON2 = 0;
 	OC1CON1bits.OCTSEL = 0b111;
-	OC1R = 0;			//duty cycle of 50%
+	OC1R = 0;			//duty cycle of 0%
 	OC1RS = 51000;			//period
 	OC1CON2bits.SYNCSEL = 0x1F;
 	OC1CON1bits.OCM = 0b110;	//PWM, no fault
@@ -62,7 +62,7 @@ void initMotors()
 	OC2CON1 = 0;
 	OC2CON2 = 0;
 	OC2CON1bits.OCTSEL = 0b111;
-	OC2R = 0;			//duty cycle of 50%
+	OC2R = 0;			//duty cycle of 0%
 	OC2RS = 51000;			//period
 	OC2CON2bits.SYNCSEL = 0x1F;
 	OC2CON1bits.OCM = 0b110;	//PWM, no fault

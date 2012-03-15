@@ -15,7 +15,7 @@ void __attribute__((__interrupt__, no_auto_psv)) _CNInterrupt(void)
 		estopLastState = EStop;
 		if(EStop && (stateOfMarvin == 0))	//maybe change to during state=1 and estop press for 2 buttons activation
 		{
-			activateValve(1000);
+			activateValve(100);
 			disableMotor();
 		}
 		else if(EStop && (stateOfMarvin != 0))

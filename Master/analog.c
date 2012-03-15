@@ -1,12 +1,32 @@
 #include <p24fj256ga110.h>
 
 #define CH_COUNT 12
+#define DIST_COUNT 23
 unsigned int analogValues[CH_COUNT];
 unsigned int count = 0;
+
+unsigned int IR1raw = 0, IR2raw = 0, IR3raw = 0, IR4raw = 0, IR5raw = 0, IR6raw = 0;
+unsigned int IR1 = 0, IR2 = 0, IR3 = 0, IR4 = 0, IR5 = 0, IR6 = 0;
+unsigned int FireL = 0, FireM = 0, FireR = 0;
+unsigned int LightF = 0, LightR = 0, Sound = 0;
 
 void __attribute__((interrupt, no_auto_psv)) _ADC1Interrupt (void)
 {
 	AD1CON1bits.ASAM = 0;
+	LightR = ADC1BUF0;
+	IR3raw = ADC1BUF1;
+	IR5raw = ADC1BUF2;
+	IR4raw = ADC1BUF3;
+	Sound = ADC1BUF4;
+	IR2raw = ADC1BUF5;
+	IR1raw = ADC1BUF6;
+	FireR = ADC1BUF7;
+	FireM = ADC1BUF8;
+	FireL = ADC1BUF9;
+	LightF = ADC1BUFA;
+	IR6raw = ADC1BUFB;
+	
+	/*Using an array to store
 	analogValues[0]=ADC1BUF0;
 	analogValues[1]=ADC1BUF1;
 	analogValues[2]=ADC1BUF2;
@@ -18,7 +38,7 @@ void __attribute__((interrupt, no_auto_psv)) _ADC1Interrupt (void)
 	analogValues[8]=ADC1BUF8;
 	analogValues[9]=ADC1BUF9;
 	analogValues[10]=ADC1BUFA;
-	analogValues[11]=ADC1BUFB;
+	analogValues[11]=ADC1BUFB;*/
 	_AD1IF = 0;
 	AD1CON1bits.ASAM = 1;
 }
@@ -64,3 +84,30 @@ void initAnalog()
 		analogValues[i] = 0;
 	}	
 }
+
+unsigned int adc_table[DIST_COUNT][2] = 
+	{
+		{610, 3},
+		{560, 4},
+		{491, 5},
+		{420, 6},
+		{363, 7},
+		{330, 8},
+		{290, 9},
+		{263, 10},
+		{238, 11},
+		{215, 12},
+		{202, 13},
+		{188, 14},
+		{176, 15},
+		{164, 16},
+		{158, 17},
+		{150, 18},
+		{142, 19},
+		{132, 20},
+		{123, 21},
+		{116, 22},
+		{108, 23},
+		{100, 24},
+		{95, 25}
+	};
