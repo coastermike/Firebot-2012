@@ -7,38 +7,65 @@ extern unsigned int stateOfMarvin;
 unsigned char startLastState = 0;
 unsigned char estopLastState = 0;
 
+unsigned char sw1Temp = 0, sw2Temp = 0;
+
 void __attribute__((__interrupt__, no_auto_psv)) _CNInterrupt(void)
 {
 	_CNIF = 0;
-	if(EStop != estopLastState)
+	if(Start && (sw1Temp == 0))
 	{
-		estopLastState = EStop;
-		if(EStop && (stateOfMarvin == 0))	//maybe change to during state=1 and estop press for 2 buttons activation
+		sw1Temp = 1;
+	}
+	else if(!Start && (sw1Temp == 1))
+	{
+		sw1Temp = 2;
+	}
+	if(EStop && (sw2Temp == 0))
+	{
+		sw2Temp = 1;
+	}
+	else if(!EStop && (sw2Temp == 1))
+	{
+		sw2Temp = 2;
+	}			
+}
+
+void __attribute__((__interrupt__, no_auto_psv)) _T3Interrupt(void)
+{
+	if((sw1Temp == 2) && !Start)
+	{
+		sw1Temp++;
+	}
+	else if((sw1Temp == 3) && !Start)
+	{
+		sw1Temp = 0;
+		if((stateOfMarvin == 0) || (stateOfMarvin == 1))
+		{
+			stateOfMarvin = 2;
+			PR1 = 10000;
+		}
+	}
+	if((sw2Temp == 2) && !EStop)
+	{
+		sw2Temp++;
+	}
+	else if((sw2Temp == 3) && !EStop)
+	{
+		sw2Temp = 0;
+		if(stateOfMarvin == 0)	//maybe change to during state=1 and estop press for 2 buttons activation
 		{
 			activateValve(100);
 			disableMotor();
 		}
-		else if(EStop && (stateOfMarvin != 0))
+		else if(stateOfMarvin != 0)
 		{
 			disableValve();
 			disableMotor();
 			stateOfMarvin = 0;
 			PR1 = 31250;
-		}	
-	}
-	if(Start != startLastState)
-	{
-		startLastState = Start;
-		if(Start && (stateOfMarvin == 0))
-		{
-			stateOfMarvin = 1;
 		}
-		if(!Start && (stateOfMarvin == 1))
-		{
-			stateOfMarvin = 2;
-			PR1 = 10000;
-		}		
-	}			
+	}
+	_T3IF = 0;
 }
 
 void initButtons()
@@ -51,6 +78,15 @@ void initButtons()
 	_CN21IE = 1;
 	_CN20PDE = 1;	//enables the weak pull up resistor for 20, 21
 	_CN21PDE = 1;
+	
+	T3CONbits.TCKPS = 0b10;
+	T3CONbits.TCS = 0;
+	T3CONbits.TGATE = 0;
+	PR3 = 2500;
+	T3CONbits.TON = 1;
+	_T3IF = 0;
+	_T3IP = 3;
+	_T3IE = 1;
 	
 	_CNIF = 0;				//clears interrupt flag
 	_CNIP = 4;				//sets interrupt priority

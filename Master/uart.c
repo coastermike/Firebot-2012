@@ -18,7 +18,7 @@ void __attribute__((interrupt, no_auto_psv)) _T4Interrupt (void)
 {
 	writeUart();
 	LED4 = ~LED4;
-	_T2IF = 0;
+	_T4IF = 0;
 }
 
 //U1TX interrupt

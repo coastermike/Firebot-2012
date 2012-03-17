@@ -60,23 +60,25 @@ void setup()
 
 void loop()
 {
-  if(Serial.available())
+  unsigned char charIn = 0;
+  while(Serial.available())
   {
+    charIn = Serial.read();
     if(receiveCount<3)
     {
-      if((Serial.read() == 0x40) && (receiveCount == 0))
+      if((charIn == 0x40) && (receiveCount == 0))
       {
         receiveCount++;
       }
-      else if((Serial.read() == 0x30) && (receiveCount == 1))
+      else if((charIn == 0x30) && (receiveCount == 1))
       {
         receiveCount++;
       }
-      else if((Serial.read() == 0x20) && (receiveCount == 2))
+      else if((charIn == 0x20) && (receiveCount == 2))
       {
         receiveCount++;
       }
-      else if((Serial.read() == 0x10) && (receiveCount == 3))
+      else if((charIn == 0x10) && (receiveCount == 3))
       {
         receiveCount++;
       }
@@ -87,7 +89,7 @@ void loop()
     }
     else if(receiveCount < MAXTRANSMIT)
     {
-      receiveData[receiveCount] = Serial.read();
+      receiveData[receiveCount] = charIn;
       receiveCount++;
     }
     else
@@ -119,31 +121,32 @@ void loop()
       CountR = (receiveData[34]<<8) | receiveData[35];
       
       Mode = receiveData[36];
+      receiveCount = 0;
     }
   }
   
   stroke(0,0,0);
   rect(85, 25, 50, 8);
   stroke(255,165,0);
-  sprintf(FireLStr, "%4d", FireL);
+  sprintf(FireLStr, "%4u", FireL);
   text(FireLStr, 90, 30, 8);
   
   stroke(0,0,0);
   rect(135, 25, 50, 8);
   stroke(255,165,0);
-  sprintf(FireMStr, "%4d", FireM);
+  sprintf(FireMStr, "%4u", FireM);
   text(FireMStr, 140, 30, 8);
   
   stroke(0,0,0);
   rect(185, 25, 50, 8);
   stroke(255,165,0);
-  sprintf(FireRStr, "%4d", FireR);
+  sprintf(FireRStr, "%4u", FireR);
   text(FireRStr, 190, 30, 8);
   
   stroke(0,0,0);
   rect(135, 45, 50, 8);
   stroke(255,255,255);
-  sprintf(IR1Str, "%4d", IR1);
+  sprintf(IR1Str, "%4u", IR1);
   text(IR1Str, 140, 50, 8);
   
   
@@ -152,7 +155,7 @@ void loop()
   stroke(0,0,0);
   rect(85, 65, 50, 8);
   stroke(255,255,255);
-  sprintf(IR6Str, "%4d", IR6);
+  sprintf(IR6Str, "%4u", IR6);
   text(IR6Str, 90, 70, 8);
   
   
@@ -161,7 +164,7 @@ void loop()
   stroke(0,0,0);
   rect(185, 65, 50, 8);
   stroke(255,255,255);
-  sprintf(IR2Str, "%4d", IR2);
+  sprintf(IR2Str, "%4u", IR2);
   text(IR2Str, 190, 70, 8);
   
   text("Motor", 240, 70, 8);
@@ -171,7 +174,7 @@ void loop()
   stroke(0,0,0);
   rect(85, 85, 50, 8);
   stroke(255,255,255);
-  sprintf(IR5Str, "%4d", IR5);
+  sprintf(IR5Str, "%4u", IR5);
   text(IR5Str, 90, 90, 8);
   
   text("Light", 140, 90, 8);
@@ -179,7 +182,7 @@ void loop()
   stroke(0,0,0);
   rect(185, 85, 50, 8);
   stroke(255,255,255);
-  sprintf(IR3Str, "%4d", IR3);
+  sprintf(IR3Str, "%4u", IR3);
   text(IR3Str, 190, 90, 8);
   
   text("Count", 240, 90, 8);
@@ -187,7 +190,7 @@ void loop()
   stroke(0,0,0);
   rect(135, 105, 50, 8);
   stroke(255,255,255);
-  sprintf(IR4Str, "%4d", IR4);
+  sprintf(IR4Str, "%4u", IR4);
   text(IR4Str, 140, 110, 8);
   
   text("Sound: ", 10, 140, 8);
