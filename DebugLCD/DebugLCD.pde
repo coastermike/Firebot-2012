@@ -14,9 +14,9 @@ unsigned int FireR = 0;
 unsigned int LightF = 0;
 unsigned int LightR = 0;
 unsigned int Sound = 0;
-unsigned int MotorL = 0;
+int MotorL = 0;
 unsigned int CountL = 0;
-unsigned int MotorR = 0;
+int MotorR = 0;
 unsigned int CountR = 0;
 unsigned int Mode = 0;
 
@@ -40,13 +40,13 @@ void setup()
   
   text("Motor", 40, 70, 8);
   text("IR", 90, 70, 8);
-  text("Light", 140, 70, 8);
+  text("Liht", 140, 70, 8);
   text("IR", 190, 70, 8);
   text("Motor", 240, 70, 8);
   
   text("Count", 40, 90, 8);
   text("IR", 90, 90, 8);
-  text("Light", 140, 90, 8);
+  text("Liht", 140, 90, 8);
   text("IR", 190, 90, 8);
   text("Count", 240, 90, 8);
   
@@ -149,8 +149,11 @@ void loop()
   sprintf(IR1Str, "%4u", IR1);
   text(IR1Str, 140, 50, 8);
   
-  
-  text("Motor", 40, 70, 8);
+  stroke(0,0,0);
+  rect(35, 65, 50, 8);
+  stroke(255,255,255);
+  sprintf(MotorLStr, "%4d", MotorL);
+  text(MotorLStr, 40, 70, 8);
   
   stroke(0,0,0);
   rect(85, 65, 50, 8);
@@ -158,8 +161,11 @@ void loop()
   sprintf(IR6Str, "%4u", IR6);
   text(IR6Str, 90, 70, 8);
   
-  
-  text("Light", 140, 70, 8);
+  stroke(0,0,0);
+  rect(135, 65, 50, 8);
+  stroke(255,255,255);
+  sprintf(LightFStr, "%4u", LightF);
+  text(LightFStr, 140, 70, 8);
   
   stroke(0,0,0);
   rect(185, 65, 50, 8);
@@ -167,9 +173,17 @@ void loop()
   sprintf(IR2Str, "%4u", IR2);
   text(IR2Str, 190, 70, 8);
   
-  text("Motor", 240, 70, 8);
+  stroke(0,0,0);
+  rect(235, 65, 50, 8);
+  stroke(255,255,255);
+  sprintf(MotorRStr, "%4d", MotorR);
+  text(MotorRStr, 240, 70, 8);
   
-  text("Count", 40, 90, 8);
+  stroke(0,0,0);
+  rect(35, 85, 50, 8);
+  stroke(255,255,255);
+  sprintf(CountLStr, "%4u", CountL);
+  text(CountLStr, 40, 90, 8);
   
   stroke(0,0,0);
   rect(85, 85, 50, 8);
@@ -177,7 +191,11 @@ void loop()
   sprintf(IR5Str, "%4u", IR5);
   text(IR5Str, 90, 90, 8);
   
-  text("Light", 140, 90, 8);
+  stroke(0,0,0);
+  rect(135, 85, 50, 8);
+  stroke(255,255,255);
+  sprintf(LightRStr, "%4u", LightR);
+  text(LightRStr, 140, 90, 8);
   
   stroke(0,0,0);
   rect(185, 85, 50, 8);
@@ -185,7 +203,11 @@ void loop()
   sprintf(IR3Str, "%4u", IR3);
   text(IR3Str, 190, 90, 8);
   
-  text("Count", 240, 90, 8);
+  stroke(0,0,0);
+  rect(235, 85, 50, 8);
+  stroke(255,255,255);
+  sprintf(CountRStr, "%4u", CountR);
+  text(CountRStr, 240, 90, 8);
   
   stroke(0,0,0);
   rect(135, 105, 50, 8);
@@ -193,8 +215,17 @@ void loop()
   sprintf(IR4Str, "%4u", IR4);
   text(IR4Str, 140, 110, 8);
   
-  text("Sound: ", 10, 140, 8);
-  text("State: ", 10, 165, 8);
+  stroke(0,0,0);
+  rect(60, 135, 50, 8);
+  stroke(255,255,255);
+  sprintf(SoundStr, "%4u", Sound);
+  text(SoundStr, 65, 140, 8);
+  
+  stroke(0,0,0);
+  rect(60, 160, 50, 8);
+  stroke(255,255,255);
+  sprintf(ModeStr, "%4u", Mode);
+  text(ModeStr, 65, 165, 8);
   
     
 }

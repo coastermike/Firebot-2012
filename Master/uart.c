@@ -4,7 +4,7 @@
 
 #define MAXTRANSMIT 40
 
-extern unsigned int IR1raw, IR2raw, IR3raw, IR4raw, IR5raw, IR6raw;
+extern unsigned int IR1, IR2, IR3, IR4, IR5, IR6;
 extern unsigned int FireL, FireM, FireR;
 extern unsigned int LightF, LightR, Sound;
 extern unsigned int speedL, speedR;
@@ -65,7 +65,7 @@ void initUart()
 	T4CONbits.TCKPS = 0b10;	//1:64 prescalar
 	T4CONbits.TCS = 0;
 	T4CONbits.TGATE = 0;
-	PR4 = 12500;				//50ms timing
+	PR4 = 50000;				//200ms timing
 	T4CONbits.TON = 1;
 	_T4IE = 1;
 	_T4IP = 4;
@@ -74,18 +74,18 @@ void initUart()
 //store variables into a matrix of 28 variables. Then start transmit of 28 bytes.
 void writeUart()
 {
-	transmit[4] = (char)(IR1raw>>8);//takeoff;
-	transmit[5] = (char)IR1raw;//takeoff;
-	transmit[6] = (char)(IR2raw>>8);//landing;
-	transmit[7] = (char)IR2raw;//landing;
-	transmit[8] = (char)(IR3raw>>8);
-	transmit[9] = (char)(IR3raw);
-	transmit[10] = (char)(IR4raw>>8);
-	transmit[11] = (char)(IR4raw);
-	transmit[12] = (char)(IR5raw>>8);
-	transmit[13] = (char)(IR5raw);
-	transmit[14] = (char)(IR6raw>>8);
-	transmit[15] = (char)(IR6raw);
+	transmit[4] = (char)(IR1>>8);//takeoff;
+	transmit[5] = (char)IR1;//takeoff;
+	transmit[6] = (char)(IR2>>8);//landing;
+	transmit[7] = (char)IR2;//landing;
+	transmit[8] = (char)(IR3>>8);
+	transmit[9] = (char)(IR3);
+	transmit[10] = (char)(IR4>>8);
+	transmit[11] = (char)(IR4);
+	transmit[12] = (char)(IR5>>8);
+	transmit[13] = (char)(IR5);
+	transmit[14] = (char)(IR6>>8);
+	transmit[15] = (char)(IR6);
 	transmit[16] = (char)(FireL>>8);
 	transmit[17] = (char)FireL;
 	transmit[18] = (char)(FireM>>8);

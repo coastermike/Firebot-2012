@@ -16,6 +16,8 @@ unsigned int stateOfMarvin = 0;
 
 int main(void)
 {
+	INTCON1bits.NSTDIS = 1;
+	
 	initAnalog();
 	initLED();
 	initUart();
@@ -24,9 +26,11 @@ int main(void)
 	initValve();
 	initMotors();
 	
-	AD1CON1bits.ASAM = 1;
 	while(1)
 	{
+		AD1CON1bits.ASAM = 1;
+		while(AD1CON1bits.ASAM && _AD1IF);
+		
 		//waiting for start button
 		if(stateOfMarvin == 0 || stateOfMarvin == 1)
 		{
@@ -36,7 +40,8 @@ int main(void)
 		else if(stateOfMarvin == 2)
 		{
 			enableMotor();
-			setSpeed(255, 255);
+			//setSpeed(255, 255);
+			followRightWall(255);
 		}		
 	}
 }

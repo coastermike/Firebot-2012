@@ -1,13 +1,16 @@
 #include <p24fj256ga110.h>
 #include "motors.h"
+#include "analog.h"
 
 #define COUNT_PER_MM 1.25
+
+extern unsigned int IR1, IR2, IR3, IR4, IR5, IR6;
 
 unsigned int leftMM = 0, rightMM = 0;	//distance in mm
 unsigned int leftCount = 0, rightCount = 0;	//raw count from hall effects
 
 //
-//1.25counts/mm, 4counts=5mm
+//1.25counts/mm, 4counts=5mm9
 //
 //left wheel
 void __attribute__((interrupt, no_auto_psv)) _INT1Interrupt (void)
@@ -122,6 +125,30 @@ void setSpeed(int speedL, int speedR)
 	}
 }
 
+void followRightWall(unsigned int speed)
+{
+	if(IR1 < 17)
+	{
+		setSpeed(-100, 100);		
+	}
+	else if(IR2 > 14)
+	{
+		setSpeed(speed, speed-150);
+	}
+	else if((int)(IR3-IR2) > 0)
+	{
+		setSpeed(speed-100, speed);
+	}
+	else if((int)(IR2-IR3) > 0)
+	{
+		setSpeed(speed, speed-100);
+	}
+	else
+	{
+		setSpeed(speed, speed);
+	}
+}
+	
 void setSpeedDist(int speed, unsigned int dist)
 {
 	

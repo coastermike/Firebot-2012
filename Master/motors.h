@@ -6,6 +6,7 @@ void enableMotor();
 void disableMotor();
 void setSpeed(int speedL, int speedR);
 void setSpeedDist(int speed, unsigned int dist);
+void followRightWall(unsigned int speed);
 
 #define AIN1 PORTCbits.RC1
 #define AIN2 PORTEbits.RE7

@@ -61,8 +61,9 @@ void __attribute__((__interrupt__, no_auto_psv)) _T3Interrupt(void)
 		{
 			disableValve();
 			disableMotor();
+			setSpeed(0,0);
 			stateOfMarvin = 0;
-			PR1 = 31250;
+			PR1 = 32500;//15625;
 		}
 	}
 	_T3IF = 0;
