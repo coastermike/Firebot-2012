@@ -8,9 +8,9 @@ extern unsigned int IR1, IR2, IR3, IR4, IR5, IR6;
 
 unsigned int leftMM = 0, rightMM = 0;	//distance in mm
 unsigned int leftCount = 0, rightCount = 0;	//raw count from hall effects
-
+unsigned int tempFollow = 0;
 //
-//1.25counts/mm, 4counts=5mm9
+//1.25counts/mm, 4counts=5mm
 //
 //left wheel
 void __attribute__((interrupt, no_auto_psv)) _INT1Interrupt (void)
@@ -84,6 +84,14 @@ void disableMotor()
 
 void setSpeed(int speedL, int speedR)
 {
+	if(speedL != 0 && speedR != 0)
+	{
+		enableMotor();
+	}
+	else
+	{
+		disableMotor();
+	}		
 	if(speedL == 0)
 	{
 		AIN1 = 0;
@@ -127,26 +135,53 @@ void setSpeed(int speedL, int speedR)
 
 void followRightWall(unsigned int speed)
 {
-	if(IR1 < 17)
+	enableMotor();
+	if(!tempFollow)
 	{
-		setSpeed(-100, 100);		
+		if(IR1 < 17)
+		{
+			setSpeed(-100, 100);
+			tempFollow = 1;
+		}
+		else if(IR2 > 15)
+		{
+			setSpeed(speed, speed-150);
+		}
+		else if(IR2 < 5)
+		{
+			setSpeed(speed-150, speed);
+		}	
+		else if((int)(IR3-IR2) > 0)
+		{
+			setSpeed(speed-50, speed);
+		}
+		else if((int)(IR2-IR3) > 0)
+		{
+			setSpeed(speed, speed-50);
+		}
+		else
+		{
+			setSpeed(speed, speed);
+		}
 	}
-	else if(IR2 > 14)
+	else if(tempFollow)
 	{
-		setSpeed(speed, speed-150);
-	}
-	else if((int)(IR3-IR2) > 0)
-	{
-		setSpeed(speed-100, speed);
-	}
-	else if((int)(IR2-IR3) > 0)
-	{
-		setSpeed(speed, speed-100);
-	}
-	else
-	{
-		setSpeed(speed, speed);
-	}
+		if((IR2 - IR3) > 1)
+		{
+			setSpeed(-100, 100);
+		}	
+		else if((IR3 - IR2) < 2)
+		{
+			tempFollow = 0;
+		}	
+	}		
+}
+	
+void resetCount()
+{
+	setSpeed(0,0);
+	leftCount = 0;
+	rightCount = 0;
 }
 	
 void setSpeedDist(int speed, unsigned int dist)

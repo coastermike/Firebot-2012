@@ -7,6 +7,7 @@ unsigned int IR1raw = 0, IR2raw = 0, IR3raw = 0, IR4raw = 0, IR5raw = 0, IR6raw 
 unsigned int IR1 = 0, IR2 = 0, IR3 = 0, IR4 = 0, IR5 = 0, IR6 = 0;
 unsigned int FireL = 0, FireM = 0, FireR = 0;
 unsigned int LightF = 0, LightR = 0, Sound = 0;
+unsigned int lightCalBlackF = 0, lightCalBlackR = 0, lightCalWhiteF = 0, lightCalWhiteR = 0, lightCalMidF = 0, lightCalMidR = 0;
 
 unsigned int adc_table[DIST_COUNT][2] = 
 	{
@@ -124,4 +125,41 @@ void initAnalog()
 	_AD1IF = 0;
 	_AD1IP = 4;
 	_AD1IE = 1;	
+}
+
+void calLight(unsigned int type)
+{
+	unsigned int i = 0, lightTotalF = 0, lightTotalR = 0;
+	
+	for(i=0; i<10; i++)
+	{
+		AD1CON1bits.ASAM = 1;
+		while(AD1CON1bits.ASAM && _AD1IF);
+		lightTotalF += LightF;
+		lightTotalR += LightR;
+	}
+	if(!type)
+	{
+		lightCalBlackF = lightTotalF/10;
+		lightCalBlackR = lightTotalR/10;
+	}
+	else	
+	{
+		lightCalWhiteF = lightTotalF/10;
+		lightCalWhiteR = lightTotalR/10;
+	}	
+}
+
+void setWhiteLight()
+{
+	calLight(1);
+	lightCalMidF = lightCalWhiteF - 400;
+	lightCalMidR = lightCalWhiteR - 400;
+}
+
+void setBlackLight()
+{
+	calLight(0);
+	lightCalMidF = (lightCalWhiteF + lightCalBlackF)/2;
+	lightCalMidR = (lightCalWhiteR + lightCalBlackR)/2;
 }

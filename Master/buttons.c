@@ -3,7 +3,7 @@
 #include "motors.h"
 #include "valve.h"
 
-extern unsigned int stateOfMarvin;
+extern unsigned int stateOfMarvin, roomCount;
 unsigned char startLastState = 0;
 unsigned char estopLastState = 0;
 
@@ -63,6 +63,7 @@ void __attribute__((__interrupt__, no_auto_psv)) _T3Interrupt(void)
 			disableMotor();
 			setSpeed(0,0);
 			stateOfMarvin = 0;
+			roomCount = 0;
 			PR1 = 32500;//15625;
 		}
 	}
