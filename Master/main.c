@@ -19,6 +19,7 @@ extern unsigned int FireL, FireM, FireR;
 extern unsigned int IR1, IR2, IR3, IR4, IR5, IR6;
 
 unsigned int stateOfMarvin = 0, roomCount = 0, lightCount = 0;	
+unsigned int room3Pos = 0, fireTemp = 0, fireCount = 0;
 
 int main(void)
 {
@@ -40,8 +41,11 @@ int main(void)
 	T5CONbits.TON = 0;
 	_T5IF = 0;
 	
+	AD1CON1bits.ASAM = 1;
+	while(AD1CON1bits.ASAM && _AD1IF);
+		
 //	test state enable	
-//	stateOfMarvin = 250;
+//	stateOfMarvin = 200;
 	while(1)
 	{
 		AD1CON1bits.ASAM = 1;
@@ -108,7 +112,7 @@ int main(void)
 				lightCount = 0;
 				roomCount++;
 				//1, 3, 5 fire, 2, 4, 6(to room4) next room
-				if((roomCount == 1) || (roomCount == 3) || (roomCount == 5) ||roomCount == 7)
+				if((roomCount == 1) || (roomCount == 3) || (roomCount == 5) || (roomCount == 7))
 				{
 					if(roomCount != 5)
 					{
@@ -124,16 +128,21 @@ int main(void)
 						{
 							stateOfMarvin = 42;
 						}		
-					}		
+					}
+							
 				}
 				else if((roomCount == 2) || (roomCount == 4))
 				{
 					stateOfMarvin = 4;
 				}
-				else if (roomCount == 6)
+				else if ((roomCount == 6) && (room3Pos == 0))
 				{
 					stateOfMarvin = 56;
-				}		
+				}
+				else if ((roomCount == 6) && (room3Pos == 1))
+				{
+					stateOfMarvin = 55;
+				}	
 			}
 			setSpeed(NORMSPEED, NORMSPEED);		
 		}
@@ -172,7 +181,7 @@ int main(void)
 			{
 				AD1CON1bits.ASAM = 1;
 				while(AD1CON1bits.ASAM && _AD1IF);
-				if(FireL < 400 || FireR < 400 || FireM < 200)
+				if((FireL < 200) || (FireR < 200) || (FireM < 200))
 				{
 					stateOfMarvin = 200;
 					setSpeed(0,0);
@@ -193,7 +202,7 @@ int main(void)
 		//driving forward to get ready to follow right wall out of room
 		else if(stateOfMarvin == 43)
 		{
-			if(roomCount == 1 || roomCount == 3 || roomCount == 5)
+			if((roomCount == 1) || (roomCount == 3) || (roomCount == 5))
 			{
 				if(IR1 > 17)
 				{
@@ -209,7 +218,8 @@ int main(void)
 					}
 					else
 					{
-						stateOfMarvin = 55;
+						stateOfMarvin = 4;
+						room3Pos = 1;
 						setSpeed(0,0);
 						resetCount();
 					}	
@@ -243,7 +253,7 @@ int main(void)
 			{
 				AD1CON1bits.ASAM = 1;
 				while(AD1CON1bits.ASAM && _AD1IF);
-				if(FireL < 400 || FireR < 400 || FireM < 200)
+				if((FireL < 200) || (FireR < 200) || (FireM < 200))
 				{
 					stateOfMarvin = 200;
 					setSpeed(0,0);
@@ -278,7 +288,7 @@ int main(void)
 		//getting to room 4 coming from room 3 with room 3 door in pos 2 - door away from wall
 		else if(stateOfMarvin == 55)
 		{
-			if(leftCount < 1500)
+			if(leftCount < 1450)
 			{
 				followRightWall(NORMSPEED);
 			}
@@ -324,11 +334,91 @@ int main(void)
 		{
 			//use intensity?
 			//if mid is >value then too far away, while using left right to center
+			
+			if(((FireM < 25) && (FireM > 0)) && ((FireL < 60) && (FireR < 60)) && ((FireR < 60) && (FireR < 60)))
+			{
+				fireCount++;
+			}
+			else if(IR6 < 8)
+			{
+				setSpeed(NORMSPEED, NORMSPEED-290);
+			}
+			else if(IR2 < 8)
+			{
+				setSpeed(NORMSPEED-290, NORMSPEED);
+			}		
+			else if ((FireL < 65) && (FireR < 65))
+			{
+				setSpeed(NORMSPEED, NORMSPEED);
+			}	
+			else if(FireL < 65)
+			{
+				setSpeed(NORMSPEED, NORMSPEED-150);
+			}	
+			else if(FireR < 65)
+			{
+				setSpeed(NORMSPEED-150, NORMSPEED);
+			}
+			else if(((FireL<250) && (FireL>0)) || ((FireR<250) && (FireR>0)))
+			{
+				setSpeed(NORMSPEED-150, NORMSPEED-150);
+			}	
+			else
+			{
+				setSpeed(NORMSPEED-100, -NORMSPEED+100);
+			}
+			if(fireCount > 5)
+			{
+				stateOfMarvin = 201;
+				fireCount = 0;
+			}	
 		}
+		
+		else if(stateOfMarvin == 201)
+		{
+			T5CONbits.TON = 1;
+			for(i=NORMSPEED-100; i>10; i=i-10)
+			{
+				setSpeed(i, i);
+				while(!_T5IF);
+				_T5IF = 0;
+			}	
+			T5CONbits.TON = 0;
+			setSpeed(0,0);
+			stateOfMarvin = 202;
+		}
+		//put out fire sequence
+		else if(stateOfMarvin == 202)
+		{
+			//fire rotate and spray
+			if(fireTemp==0)
+			{
+				resetCount();
+				activateValve(200);
+				setSpeed(-NORMSPEED, NORMSPEED);
+				while(leftCount < 20);
+				setSpeed(0,0);
+				fireTemp = 1;
+			}
+			if((FireL < 50) || (FireM < 50) || (FireR < 50))
+			{
+				resetCount();
+				activateValve(300);
+				setSpeed(NORMSPEED-100, -NORMSPEED+100);
+				while(leftCount < 70);
+				setSpeed(0,0);
+				resetCount();
+				activateValve(300);
+				setSpeed(-NORMSPEED+100, NORMSPEED-100);
+				while(leftCount < 70);
+				setSpeed(0,0);
+			}	
+		}	
 		//test state
 		else if(stateOfMarvin == 250)
 		{
 			followRightWall(NORMSPEED);
-		}		
+		}
+	Sound = roomCount;		
 	}
 }
