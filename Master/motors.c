@@ -185,6 +185,56 @@ void followRightWall(unsigned int speed)
 //		}	
 //	}		
 }
+
+void followLeftWall(unsigned int speed)
+{
+	enableMotor();
+//	if(!tempFollow)
+//	{
+		if(IR1 < 17)
+		{
+			setSpeed(100, -100);
+			tempFollow = 1;
+			Sound = 1;
+		}
+		else if(IR6 > 14)
+		{
+			setSpeed(speed-150, speed);
+			Sound = 2;
+		}
+		else if(IR6 < 8)
+		{
+			setSpeed(speed, speed-290);
+			Sound = 3;
+		}	
+		else if((int)(IR5-IR6) > 0)
+		{
+			setSpeed(speed, speed-50);
+			Sound = 4;
+		}
+		else if((int)(IR6-IR5) > 0)
+		{
+			setSpeed(speed-50, speed);
+			Sound = 5;
+		}
+		else
+		{
+			setSpeed(speed, speed);
+			Sound = 6;
+		}
+//	}
+//	else if(tempFollow)
+//	{
+//		if((IR2 - IR3) > 1)
+//		{
+//			setSpeed(-100, 100);
+//		}	
+//		else if((IR3 - IR2) < 2)
+//		{
+//			tempFollow = 0;
+//		}	
+//	}		
+}
 	
 void resetCount()
 {
