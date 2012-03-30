@@ -31,7 +31,9 @@ int main(void)
 	initI2C();
 	initValve();
 	initMotors();
-	
+
+//	test state enable	
+//	stateOfMarvin = 250;
 	while(1)
 	{
 		AD1CON1bits.ASAM = 1;
@@ -47,6 +49,7 @@ int main(void)
 		{
 			setWhiteLight();
 			resetCount();
+			stateOfMarvin = 3;
 			stateOfMarvin = 3;
 		}
 		//travel 20mm to get off white circle then stop and read black to Cal
@@ -101,7 +104,7 @@ int main(void)
 				{
 					stateOfMarvin = 42;
 				}
-				else
+				else if((roomCount == 2) || (roomCount == 4))
 				{
 					stateOfMarvin = 4;
 				}		
@@ -174,6 +177,11 @@ int main(void)
 		{
 			//use intensity?
 			//if mid is >value then too far away, while using left right to center
-		}	
+		}
+		//test state
+		else if(stateOfMarvin == 250)
+		{
+			followRightWall(NORMSPEED);
+		}		
 	}
 }

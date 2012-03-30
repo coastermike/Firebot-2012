@@ -9,6 +9,9 @@ extern unsigned int IR1, IR2, IR3, IR4, IR5, IR6;
 unsigned int leftMM = 0, rightMM = 0;	//distance in mm
 unsigned int leftCount = 0, rightCount = 0;	//raw count from hall effects
 unsigned int tempFollow = 0;
+
+unsigned int Sound = 0;
+
 //
 //1.25counts/mm, 4counts=5mm
 //
@@ -136,45 +139,51 @@ void setSpeed(int speedL, int speedR)
 void followRightWall(unsigned int speed)
 {
 	enableMotor();
-	if(!tempFollow)
-	{
+//	if(!tempFollow)
+//	{
 		if(IR1 < 17)
 		{
 			setSpeed(-100, 100);
 			tempFollow = 1;
+			Sound = 1;
 		}
-		else if(IR2 > 15)
+		else if(IR2 > 14)
 		{
 			setSpeed(speed, speed-150);
+			Sound = 2;
 		}
-		else if(IR2 < 5)
+		else if(IR2 < 8)
 		{
-			setSpeed(speed-150, speed);
+			setSpeed(speed-290, speed);
+			Sound = 3;
 		}	
 		else if((int)(IR3-IR2) > 0)
 		{
 			setSpeed(speed-50, speed);
+			Sound = 4;
 		}
 		else if((int)(IR2-IR3) > 0)
 		{
 			setSpeed(speed, speed-50);
+			Sound = 5;
 		}
 		else
 		{
 			setSpeed(speed, speed);
+			Sound = 6;
 		}
-	}
-	else if(tempFollow)
-	{
-		if((IR2 - IR3) > 1)
-		{
-			setSpeed(-100, 100);
-		}	
-		else if((IR3 - IR2) < 2)
-		{
-			tempFollow = 0;
-		}	
-	}		
+//	}
+//	else if(tempFollow)
+//	{
+//		if((IR2 - IR3) > 1)
+//		{
+//			setSpeed(-100, 100);
+//		}	
+//		else if((IR3 - IR2) < 2)
+//		{
+//			tempFollow = 0;
+//		}	
+//	}		
 }
 	
 void resetCount()

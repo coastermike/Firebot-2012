@@ -6,7 +6,7 @@ unsigned int count = 0;
 unsigned int IR1raw = 0, IR2raw = 0, IR3raw = 0, IR4raw = 0, IR5raw = 0, IR6raw = 0;
 unsigned int IR1 = 0, IR2 = 0, IR3 = 0, IR4 = 0, IR5 = 0, IR6 = 0;
 unsigned int FireL = 0, FireM = 0, FireR = 0;
-unsigned int LightF = 0, LightR = 0, Sound = 0;
+unsigned int LightF = 0, LightR = 0, Sound1 = 0;
 unsigned int lightCalBlackF = 0, lightCalBlackR = 0, lightCalWhiteF = 0, lightCalWhiteR = 0, lightCalMidF = 0, lightCalMidR = 0;
 
 unsigned int adc_table[DIST_COUNT][2] = 
@@ -44,7 +44,7 @@ void __attribute__((interrupt, no_auto_psv)) _ADC1Interrupt (void)
 	IR3raw = ADC1BUF1;
 	IR5raw = ADC1BUF2;
 	IR4raw = ADC1BUF3;
-	Sound = ADC1BUF4;
+	Sound1 = ADC1BUF4;
 	IR2raw = ADC1BUF5;
 	IR1raw = ADC1BUF6;
 	FireR = ADC1BUF7;
