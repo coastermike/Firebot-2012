@@ -413,7 +413,11 @@ int main(void)
 				while(leftCount < 70);
 				setSpeed(0,0);
 			}	
-		}	
+		}
+		//spin to double check no flame
+		
+		//return home, rooms 1,2,3 continue states until roomCount = 6 then followrightwall till white circle
+		//room 4, leave room then followright wall?
 		//test state
 		else if(stateOfMarvin == 250)
 		{
