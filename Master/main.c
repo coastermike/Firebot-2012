@@ -20,6 +20,7 @@ extern unsigned int IR1, IR2, IR3, IR4, IR5, IR6;
 
 unsigned int stateOfMarvin = 0, roomCount = 0, lightCount = 0;	
 unsigned int room3Pos = 0, fireTemp = 0, fireCount = 0;
+unsigned int soundTemp = 0;
 
 int main(void)
 {
@@ -45,16 +46,37 @@ int main(void)
 	while(AD1CON1bits.ASAM && _AD1IF);
 		
 //	test state enable	
-//	stateOfMarvin = 200;
+//	stateOfMarvin = 60;
 	while(1)
 	{
 		AD1CON1bits.ASAM = 1;
 		while(AD1CON1bits.ASAM && _AD1IF);
 		
 		//waiting for start button
-		if(stateOfMarvin == 0 || stateOfMarvin == 1)
+		if(stateOfMarvin == 0)
 		{
-			//look for sound start for 3seconds
+			if(Sound > 400)
+			{
+				stateOfMarvin = 1;
+			}	
+		}
+		//look for sound start for 1second
+		else if (stateOfMarvin == 1)
+		{
+			if((Sound > 400) && (soundTemp < 10000))
+			{
+				soundTemp++;
+			}
+			else if(Sound > 400 && (soundTemp >= 10000))
+			{
+				stateOfMarvin = 2;
+				soundTemp = 0;
+			}
+			else
+			{
+				soundTemp = 0;
+				stateOfMarvin = 0;
+			}		
 		}
 		//after start button, read white light to Cal
 		else if(stateOfMarvin == 2)
@@ -67,7 +89,7 @@ int main(void)
 		//travel 20mm to get off white circle then stop and read black to Cal
 		else if(stateOfMarvin == 3)
 		{
-			if(leftCount < 250 && rightCount < 250) //20mm?
+			if(leftCount < 350 || rightCount < 350) //20mm?
 			{
 				setSpeed(NORMSPEED, NORMSPEED);
 			}
@@ -137,11 +159,13 @@ int main(void)
 				}
 				else if ((roomCount == 6) && (room3Pos == 0))
 				{
-					stateOfMarvin = 56;
+					stateOfMarvin = 55;
+					resetCount();
 				}
 				else if ((roomCount == 6) && (room3Pos == 1))
 				{
 					stateOfMarvin = 55;
+					resetCount();
 				}	
 			}
 			setSpeed(NORMSPEED, NORMSPEED);		
@@ -285,34 +309,48 @@ int main(void)
 			}	
 			
 		}
-		//getting to room 4 coming from room 3 with room 3 door in pos 2 - door away from wall
+		//go for a bit follow right wall to avoid problems with front sensor
 		else if(stateOfMarvin == 55)
 		{
-			if(leftCount < 1450)
+			if(leftCount < 1500)
 			{
 				followRightWall(NORMSPEED);
 			}
 			else
-			{
-				setSpeed(0,0);
-				stateOfMarvin = 57;	
+			{	
+				stateOfMarvin = 56;
+				resetCount();
 			}	
-		}
-		//getting to room4 coming from room 3 with room 3 door in pos 1 - door next to wall
+		}	
+		//follow right wall til front sensor senses
 		else if(stateOfMarvin == 56)
 		{
-			if(leftCount < 3500)
+			if(IR1 < 20)
+			{
+				setSpeed(0,0);
+				stateOfMarvin = 57;
+				resetCount();
+			}
+			else
+			{
+				followRightWall(NORMSPEED);
+			}
+		}
+		else if(stateOfMarvin == 57)
+		{
+			if(leftCount < 400)
 			{
 				followRightWall(NORMSPEED);
 			}
 			else
 			{
 				setSpeed(0,0);
-				stateOfMarvin = 57;	
-			}
+				resetCount();
+				stateOfMarvin = 58;
+			}	
 		}	
-		//starting to follow leftWall for room4 locating whiteline
-		else if(stateOfMarvin == 57)
+		//switch to left wall follow//starting to follow leftWall for room4 locating whiteline
+		else if(stateOfMarvin == 58)
 		{
 			if(LightF > lightCalMidF)
 			{
@@ -328,7 +366,8 @@ int main(void)
 				lightCount = 0;
 			}
 			followLeftWall(NORMSPEED);
-		}	
+		}
+	
 		//going to flame
 		else if(stateOfMarvin == 200)
 		{
@@ -423,6 +462,6 @@ int main(void)
 		{
 			followRightWall(NORMSPEED);
 		}
-	Sound = roomCount;		
+//	Sound = roomCount;		
 	}
 }

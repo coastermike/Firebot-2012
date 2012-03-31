@@ -60,8 +60,8 @@ void __attribute__((__interrupt__, no_auto_psv)) _T3Interrupt(void)
 		else if(stateOfMarvin != 0)
 		{
 			disableValve();
-			disableMotor();
 			setSpeed(0,0);
+			disableMotor();
 			stateOfMarvin = 0;
 			roomCount = 0;
 			PR1 = 32500;//15625;

@@ -10,7 +10,7 @@ unsigned int leftMM = 0, rightMM = 0;	//distance in mm
 unsigned int leftCount = 0, rightCount = 0;	//raw count from hall effects
 unsigned int tempFollow = 0;
 
-unsigned int Sound = 0;
+//unsigned int Sound = 0;
 
 //
 //1.25counts/mm, 4counts=5mm
