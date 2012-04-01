@@ -44,9 +44,11 @@ int main(void)
 	
 	AD1CON1bits.ASAM = 1;
 	while(AD1CON1bits.ASAM && _AD1IF);
-		
+	
+	resetCount();
+	
 //	test state enable	
-//	stateOfMarvin = 60;
+//	stateOfMarvin = 203;
 	while(1)
 	{
 		AD1CON1bits.ASAM = 1;
@@ -111,7 +113,7 @@ int main(void)
 			{
 				lightCount = 0;
 			}
-			if(lightCount > 10)
+			if(lightCount > 300)
 			{
 				stateOfMarvin = 5;
 				lightCount = 0;
@@ -129,7 +131,7 @@ int main(void)
 			{
 				lightCount = 0;
 			}
-			if(lightCount > 10)
+			if(lightCount > 300)
 			{
 				lightCount = 0;
 				roomCount++;
@@ -159,6 +161,14 @@ int main(void)
 				}
 				else if ((roomCount == 6) && (room3Pos == 0))
 				{
+					setSpeed(0,0);
+					resetCount();
+					//modified to 100 from 50
+					while(leftCount < 100)
+					{
+						setSpeed(-100, -100);
+					}
+					setSpeed(0,0);	
 					stateOfMarvin = 55;
 					resetCount();
 				}
@@ -312,7 +322,7 @@ int main(void)
 		//go for a bit follow right wall to avoid problems with front sensor
 		else if(stateOfMarvin == 55)
 		{
-			if(leftCount < 1500)
+			if(leftCount < 1000)
 			{
 				followRightWall(NORMSPEED);
 			}
@@ -336,9 +346,10 @@ int main(void)
 				followRightWall(NORMSPEED);
 			}
 		}
+		//go a bit to get to a point where left wall can take over
 		else if(stateOfMarvin == 57)
 		{
-			if(leftCount < 400)
+			if(leftCount < 700)
 			{
 				followRightWall(NORMSPEED);
 			}
@@ -401,7 +412,12 @@ int main(void)
 			else if(((FireL<250) && (FireL>0)) || ((FireR<250) && (FireR>0)))
 			{
 				setSpeed(NORMSPEED-150, NORMSPEED-150);
-			}	
+			}
+			//modified by adding
+			else if(FireM < 150)
+			{
+				setSpeed(NORMSPEED-200, NORMSPEED-200);
+			}		
 			else
 			{
 				setSpeed(NORMSPEED-100, -NORMSPEED+100);
@@ -433,7 +449,7 @@ int main(void)
 			if(fireTemp==0)
 			{
 				resetCount();
-				activateValve(200);
+				activateValve(300);
 				setSpeed(-NORMSPEED, NORMSPEED);
 				while(leftCount < 20);
 				setSpeed(0,0);
@@ -442,25 +458,171 @@ int main(void)
 			if((FireL < 50) || (FireM < 50) || (FireR < 50))
 			{
 				resetCount();
-				activateValve(300);
+				activateValve(500);
 				setSpeed(NORMSPEED-100, -NORMSPEED+100);
 				while(leftCount < 70);
 				setSpeed(0,0);
 				resetCount();
-				activateValve(300);
+				activateValve(500);
 				setSpeed(-NORMSPEED+100, NORMSPEED-100);
 				while(leftCount < 70);
 				setSpeed(0,0);
+			}
+			//modified by adding to double check flame
+			else
+			{
+				stateOfMarvin = 203;
+				setSpeed(0,0);
+				resetCount();
 			}	
 		}
 		//spin to double check no flame
-		
+		else if(stateOfMarvin == 203)
+		{
+			//full CCW 450degrees while scanning fire
+			setSpeed(-NORMSPEED+100, NORMSPEED-100);
+			if(leftCount < 570)
+			{
+				if(((FireL<150) && (FireL>0)) || ((FireR<150) && (FireR>0)) || ((FireM<150) && (FireM>0)))
+				{
+					setSpeed(0,0);
+					stateOfMarvin = 200;
+				}
+			}
+			else
+			{
+				setSpeed(0,0);
+				if((roomCount == 1) || (roomCount == 3) || (roomCount == 5))
+				{
+					stateOfMarvin = 204;
+					roomCount += 10;
+				}
+				else
+				{
+					stateOfMarvin = 210;
+				}
+				resetCount();
+			}		
+		}
 		//return home, rooms 1,2,3 continue states until roomCount = 6 then followrightwall till white circle
 		//room 4, leave room then followright wall?
+		
+		//follow right wall until roomCount = 15(to avoid issue with room3) then go til circle
+		else if(stateOfMarvin == 204)
+		{
+			if(LightF > lightCalMidF)
+			{
+				lightCount++;
+			}
+			else
+			{
+				lightCount = 0;
+			}
+			if(lightCount > 10)
+			{
+				if(roomCount < 15)
+				{
+					stateOfMarvin = 205;
+				}
+				else
+				{
+					stateOfMarvin = 206;
+				}		
+				lightCount = 0;
+			}
+			followRightWall(NORMSPEED);
+		}
+		else if(stateOfMarvin == 205)
+		{
+			if(LightR > lightCalMidR)
+			{
+				lightCount++;
+			}
+			else
+			{
+				lightCount = 0;
+			}
+			if(lightCount > 300)
+			{
+				lightCount = 0;
+				roomCount++;
+				stateOfMarvin = 204;
+			}
+			setSpeed(NORMSPEED, NORMSPEED);
+		}
+		//goto home circle from room 3
+		else if(stateOfMarvin == 206)
+		{
+			if(LightF > lightCalMidF)
+			{
+				lightCount++;
+			}
+			else
+			{
+				lightCount = 0;
+			}
+			if(lightCount > 30)
+			{
+				stateOfMarvin = 225;
+				lightCount = 0;
+			}
+			followRightWall(NORMSPEED);
+		}
+		//if in forth room to get back to home
+		else if(stateOfMarvin == 210)
+		{
+			if(LightF > lightCalMidF)
+			{
+				lightCount++;
+			}
+			else
+			{
+				lightCount = 0;
+			}
+			if(lightCount > 10)
+			{
+				setSpeed(0,0);
+				resetCount();
+				setSpeed(-100, 100);
+				while(leftCount < 50);
+				setSpeed(0,0);
+				stateOfMarvin = 211;
+				lightCount = 0;
+			}
+			followRightWall(NORMSPEED);
+		}
+		//after white front drive straight til front IR
+		else if(stateOfMarvin == 210)
+		{
+			if(IR1 > 17)
+			{
+				setSpeed(NORMSPEED-100, NORMSPEED-100);
+			}
+			else
+			{
+				setSpeed(0,0);
+				stateOfMarvin = 206; //follow right til circle
+			}	
+		}	
+		//shut down
+		else if(stateOfMarvin == 225)
+		{
+			setSpeed(0,0);
+			resetCount();
+			setSpeed(0,0);
+			stateOfMarvin = 0;
+			roomCount = 0;
+		}	
 		//test state
 		else if(stateOfMarvin == 250)
 		{
-			followRightWall(NORMSPEED);
+			resetCount();
+			while(leftCount < 50)
+			{
+				setSpeed(NORMSPEED, NORMSPEED);
+			}
+			setSpeed(0,0);
+			stateOfMarvin = 0;
 		}
 //	Sound = roomCount;		
 	}
