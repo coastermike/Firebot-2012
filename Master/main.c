@@ -19,7 +19,7 @@ extern unsigned int FireL, FireM, FireR;
 extern unsigned int IR1, IR2, IR3, IR4, IR5, IR6;
 
 unsigned int stateOfMarvin = 0, roomCount = 0, lightCount = 0;	
-unsigned int room3Pos = 0, fireTemp = 0, fireCount = 0;
+unsigned int room3Pos = 0, fireTemp = 0, fireCount = 0, fireSpin = 0, fireVal = 45;
 unsigned int soundTemp = 0;
 
 int main(void)
@@ -46,7 +46,7 @@ int main(void)
 	while(AD1CON1bits.ASAM && _AD1IF);
 	
 	resetCount();
-	
+					
 //	test state enable	
 //	stateOfMarvin = 203;
 	while(1)
@@ -159,7 +159,7 @@ int main(void)
 				{
 					stateOfMarvin = 4;
 				}
-				else if ((roomCount == 6) && (room3Pos == 0))
+				else if (roomCount == 6)
 				{
 					setSpeed(0,0);
 					resetCount();
@@ -174,6 +174,7 @@ int main(void)
 				}
 				else if ((roomCount == 6) && (room3Pos == 1))
 				{
+					setSpeed(0,0);
 					stateOfMarvin = 55;
 					resetCount();
 				}	
@@ -219,6 +220,7 @@ int main(void)
 				{
 					stateOfMarvin = 200;
 					setSpeed(0,0);
+					resetCount();
 					break;
 				}
 			}
@@ -291,6 +293,7 @@ int main(void)
 				{
 					stateOfMarvin = 200;
 					setSpeed(0,0);
+					resetCount();
 					break;
 				}
 			}
@@ -322,7 +325,7 @@ int main(void)
 		//go for a bit follow right wall to avoid problems with front sensor
 		else if(stateOfMarvin == 55)
 		{
-			if(leftCount < 1000)
+			if(leftCount < 1300)
 			{
 				followRightWall(NORMSPEED);
 			}
@@ -414,13 +417,23 @@ int main(void)
 				setSpeed(NORMSPEED-150, NORMSPEED-150);
 			}
 			//modified by adding
-			else if(FireM < 150)
+			else if(FireM < fireVal)
 			{
 				setSpeed(NORMSPEED-200, NORMSPEED-200);
+				if(fireCount == 3)
+				{
+					fireVal = fireVal+50;
+					fireSpin = 0;
+				}	
 			}		
 			else
 			{
-				setSpeed(NORMSPEED-100, -NORMSPEED+100);
+				setSpeed(NORMSPEED-150, -NORMSPEED+150);
+				if(leftCount > 470)
+				{
+					fireSpin++;
+					resetCount();
+				}	
 			}
 			if(fireCount > 5)
 			{
@@ -487,6 +500,7 @@ int main(void)
 				{
 					setSpeed(0,0);
 					stateOfMarvin = 200;
+					resetCount();
 				}
 			}
 			else
@@ -520,14 +534,7 @@ int main(void)
 			}
 			if(lightCount > 10)
 			{
-				if(roomCount < 15)
-				{
-					stateOfMarvin = 205;
-				}
-				else
-				{
-					stateOfMarvin = 206;
-				}		
+				stateOfMarvin = 205;
 				lightCount = 0;
 			}
 			followRightWall(NORMSPEED);
@@ -542,11 +549,25 @@ int main(void)
 			{
 				lightCount = 0;
 			}
-			if(lightCount > 300)
+			if(lightCount > 30)
 			{
 				lightCount = 0;
 				roomCount++;
-				stateOfMarvin = 204;
+				if(roomCount != 16)
+				{
+					stateOfMarvin = 204;
+				}
+				else if(roomCount == 16)
+				{
+					setSpeed(0,0);
+					resetCount();
+					//modified to 100 from 50
+					setSpeed(-100, -100);
+					while(leftCount < 60);
+					setSpeed(5,5);	
+					stateOfMarvin = 206;
+					resetCount();
+				}	
 			}
 			setSpeed(NORMSPEED, NORMSPEED);
 		}
@@ -592,7 +613,7 @@ int main(void)
 			followRightWall(NORMSPEED);
 		}
 		//after white front drive straight til front IR
-		else if(stateOfMarvin == 210)
+		else if(stateOfMarvin == 211)
 		{
 			if(IR1 > 17)
 			{
