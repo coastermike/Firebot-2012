@@ -48,7 +48,7 @@ int main(void)
 	resetCount();
 					
 //	test state enable	
-//	stateOfMarvin = 203;
+//	stateOfMarvin = 6;
 	while(1)
 	{
 		AD1CON1bits.ASAM = 1;
@@ -91,7 +91,7 @@ int main(void)
 		//travel 20mm to get off white circle then stop and read black to Cal
 		else if(stateOfMarvin == 3)
 		{
-			if(leftCount < 350 || rightCount < 350) //20mm?
+			if(leftCount < 450 || rightCount < 450) //40mm?
 			{
 				setSpeed(NORMSPEED, NORMSPEED);
 			}
@@ -136,30 +136,35 @@ int main(void)
 				lightCount = 0;
 				roomCount++;
 				//1, 3, 5 fire, 2, 4, 6(to room4) next room
-				if((roomCount == 1) || (roomCount == 3) || (roomCount == 5) || (roomCount == 7))
+				if(roomCount == 1)
 				{
-					if(roomCount != 5)
-					{
-						stateOfMarvin = 42;
-					}
-					else if(roomCount == 5)
-					{
-						if(IR2<20 || IR3<20)
-						{
-							stateOfMarvin = 44;
-						}
-						else
-						{
-							stateOfMarvin = 42;
-						}		
-					}
-							
+					stateOfMarvin = 42;
 				}
-				else if((roomCount == 2) || (roomCount == 4))
+				else if(roomCount == 3)
 				{
-					stateOfMarvin = 4;
+					while((IR6-IR5)>3)
+					{
+						AD1CON1bits.ASAM = 1;
+						while(AD1CON1bits.ASAM && _AD1IF);
+						setSpeed(-100,100);
+					}	
+					stateOfMarvin = 42;
 				}
-				else if (roomCount == 6)
+				else if((roomCount == 5) || (roomCount == 7))
+				{
+					stateOfMarvin = 42;
+				}
+				//getting out of room 1 to goto room 2 -robogames
+				else if(roomCount == 2)
+				{
+					stateOfMarvin = 8;
+					setSpeed(0,0);
+				}	
+				else if((roomCount == 4) || (roomCount == 6) || (roomCount == 8))
+				{
+					stateOfMarvin = 6;
+				}
+/*				else if (roomCount == 6)
 				{
 					setSpeed(0,0);
 					resetCount();
@@ -177,9 +182,39 @@ int main(void)
 					setSpeed(0,0);
 					stateOfMarvin = 55;
 					resetCount();
-				}	
+				}*/	
 			}
 			setSpeed(NORMSPEED, NORMSPEED);		
+		}
+		//followleft until front white sensor
+		else if(stateOfMarvin == 6)
+		{
+			if(LightF > lightCalMidF)
+			{
+				lightCount++;
+			}
+			else
+			{
+				lightCount = 0;
+			}
+			if(lightCount > 300)
+			{
+				stateOfMarvin = 5;
+				lightCount = 0;
+			}
+			followLeftWall(NORMSPEED);
+		}	
+		//get out of room 1
+		else if(stateOfMarvin == 8)
+		{
+			if(IR1>17)
+			{
+				setSpeed(NORMSPEED-100, NORMSPEED-100);
+			}
+			else
+			{
+				stateOfMarvin = 6;
+			}
 		}
 		//fire search - move in room, spin, if flame goto it, if not goto leave
 		else if(stateOfMarvin == 42)
@@ -203,13 +238,13 @@ int main(void)
 			
 			setSpeed(0,0);
 			resetCount();
-			if(roomCount == 7)
+/*			if(roomCount == 1)
 			{
 				setSpeed(-100, 100);
 				while(leftCount < 30);
 				setSpeed(0,0);
 				resetCount();
-			}	
+			}*/	
 					
 			setSpeed(60, -60);
 			while(leftCount < 140)
@@ -229,16 +264,28 @@ int main(void)
 				setSpeed(0,0);
 				resetCount();
 				//turn to face exitting wall
-				setSpeed(100, -100);
-				while(leftCount < 200);
-				setSpeed(0,0);
-				stateOfMarvin = 43;
+				if(roomCount == 1)
+				{
+					setSpeed(100, -100);
+					while(leftCount < 200);
+					setSpeed(0,0);
+					stateOfMarvin = 43;
+				}
+				else
+				{
+					setSpeed(0,0);
+					resetCount();
+					setSpeed(-100,100);
+					while(leftCount<20);
+					setSpeed(0,0);
+					stateOfMarvin = 50;
+				}		
 			}	
 		}
 		//driving forward to get ready to follow right wall out of room
 		else if(stateOfMarvin == 43)
 		{
-			if((roomCount == 1) || (roomCount == 3) || (roomCount == 5))
+			if(roomCount == 1)
 			{
 				if(IR1 > 17)
 				{
@@ -247,22 +294,11 @@ int main(void)
 				else
 				{
 					setSpeed(0,0);
-					//if in rooms 1 or 2
-					if(roomCount < 5)
-					{
-						stateOfMarvin = 4;
-					}
-					else
-					{
-						stateOfMarvin = 4;
-						room3Pos = 1;
-						setSpeed(0,0);
-						resetCount();
-					}	
+					stateOfMarvin = 4;
 				}
 			}				
 		}
-		//room 3 door along wall search for fire
+		//search for fire following during followleft wall
 		else if(stateOfMarvin == 44)
 		{
 			setSpeed(0,0);
@@ -301,24 +337,20 @@ int main(void)
 			{
 				setSpeed(0,0);
 				resetCount();
-				//turn to face exitting wall
-//				setSpeed(-100, 100);
-//				while(leftCount < 100);
-//				setSpeed(0,0);
 				stateOfMarvin = 50;
 			}
 		}	
-		//getting to room 4 coming from room 3 with room 3 door in pos 1 - door next to wall
+		//leaving room 2,3
 		else if(stateOfMarvin == 50)
 		{
-			if(IR1 > 17)
+			if(IR1 > 16)
 			{
 				setSpeed(NORMSPEED-100, NORMSPEED-100);
 			}
 			else
 			{
 				setSpeed(0,0);
-				stateOfMarvin = 4;
+				stateOfMarvin = 6;
 			}	
 			
 		}
