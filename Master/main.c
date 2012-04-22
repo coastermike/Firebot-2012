@@ -19,8 +19,11 @@ extern unsigned int FireL, FireM, FireR;
 extern unsigned int IR1, IR2, IR3, IR4, IR5, IR6;
 
 unsigned int stateOfMarvin = 0, roomCount = 0, lightCount = 0;	
-unsigned int room3Pos = 0, fireTemp = 0, fireCount = 0, fireSpin = 0, fireVal = 45;
+unsigned int room3Pos = 0, fireTemp = 0, fireCount = 0, fireSpin = 0, fireVal = 60;
 unsigned int soundTemp = 0;
+
+unsigned int lowestTemp = 60;
+unsigned int fireState = 0;
 
 int main(void)
 {
@@ -46,7 +49,7 @@ int main(void)
 	while(AD1CON1bits.ASAM && _AD1IF);
 	
 	resetCount();
-					
+	
 //	test state enable	
 //	stateOfMarvin = 6;
 	while(1)
@@ -142,7 +145,7 @@ int main(void)
 				}
 				else if(roomCount == 3)
 				{
-					while((IR6-IR5)>3)
+					while((IR6-IR5)>2)
 					{
 						AD1CON1bits.ASAM = 1;
 						while(AD1CON1bits.ASAM && _AD1IF);
@@ -207,7 +210,7 @@ int main(void)
 		//get out of room 1
 		else if(stateOfMarvin == 8)
 		{
-			if(IR1>17)
+			if(IR1>16)
 			{
 				setSpeed(NORMSPEED-100, NORMSPEED-100);
 			}
@@ -253,7 +256,7 @@ int main(void)
 				while(AD1CON1bits.ASAM && _AD1IF);
 				if((FireL < 200) || (FireR < 200) || (FireM < 200))
 				{
-					stateOfMarvin = 200;
+					stateOfMarvin = 198;
 					setSpeed(0,0);
 					resetCount();
 					break;
@@ -276,7 +279,7 @@ int main(void)
 					setSpeed(0,0);
 					resetCount();
 					setSpeed(-100,100);
-					while(leftCount<20);
+					while(leftCount<35);
 					setSpeed(0,0);
 					stateOfMarvin = 50;
 				}		
@@ -327,7 +330,7 @@ int main(void)
 				while(AD1CON1bits.ASAM && _AD1IF);
 				if((FireL < 200) || (FireR < 200) || (FireM < 200))
 				{
-					stateOfMarvin = 200;
+					stateOfMarvin = 198;
 					setSpeed(0,0);
 					resetCount();
 					break;
@@ -342,10 +345,17 @@ int main(void)
 		}	
 		//leaving room 2,3
 		else if(stateOfMarvin == 50)
-		{
-			if(IR1 > 16)
+		{	
+			if(IR1 > 15)
 			{
-				setSpeed(NORMSPEED-100, NORMSPEED-100);
+				if(IR2 < 11)
+				{
+					setSpeed(50, 150);
+				}
+				else
+				{	
+					setSpeed(NORMSPEED-100, NORMSPEED-100);
+				}	
 			}
 			else
 			{
@@ -413,65 +423,234 @@ int main(void)
 			}
 			followLeftWall(NORMSPEED);
 		}
-	
+		//spin til fireM is less than 60
+		else if(stateOfMarvin == 198)
+		{
+			resetCount();
+			fireSpin = 0;
+			fireVal = 60;
+			setSpeed(NORMSPEED-100, -NORMSPEED+100);
+			while(FireM > fireVal)
+			{
+				AD1CON1bits.ASAM = 1;
+				while(AD1CON1bits.ASAM && _AD1IF);
+				if(leftCount > 470)
+				{
+					fireSpin++;
+					resetCount();
+				}
+				if(fireSpin == 2)
+				{
+					fireVal += 10;
+					fireSpin = 0;
+				}	
+			}	
+			setSpeed(0,0);
+			stateOfMarvin = 199;
+		}	
+		//search for lowest value on middle fire during rotation
+		else if(stateOfMarvin == 199)
+		{
+			unsigned int lowestEscape = 0;
+			lowestTemp = 60;
+			while(lowestEscape == 0)
+			{
+				resetCount();
+				setSpeed(NORMSPEED-200, -NORMSPEED+200);
+				while(leftCount<1);
+				setSpeed(0,0);
+				AD1CON1bits.ASAM = 1;
+				while(AD1CON1bits.ASAM && _AD1IF);
+				if(FireM > lowestTemp)
+				{
+					lowestEscape = 1;
+				}
+				else
+				{
+					lowestTemp = FireM;
+				}		
+			}
+			setSpeed(0,0);
+			stateOfMarvin = 200;
+		}	
 		//going to flame
 		else if(stateOfMarvin == 200)
 		{
 			//use intensity?
 			//if mid is >value then too far away, while using left right to center
 			
-			if(((FireM < 25) && (FireM > 0)) && ((FireL < 60) && (FireR < 60)) && ((FireR < 60) && (FireR < 60)))
+			//if(((FireM < 25) && (FireM > 0)) && ((FireL < 60) && (FireL > 0)) && ((FireR < 60) && (FireR > 0)))
+			//{
+			//	fireCount++;
+			//}
+			
+			if(LightF > lightCalMidF)
 			{
 				fireCount++;
-			}
-			else if(IR6 < 8)
+				fireState = 1;
+			}	
+			else if(IR6 < 10)
 			{
 				setSpeed(NORMSPEED, NORMSPEED-290);
+				fireState = 2;
 			}
-			else if(IR2 < 8)
+			else if(IR5 < 11)
+			{
+				setSpeed(100, 80);
+				fireState = 3;
+			}	
+			else if(IR2 < 10)
 			{
 				setSpeed(NORMSPEED-290, NORMSPEED);
-			}		
-			else if ((FireL < 65) && (FireR < 65))
-			{
-				setSpeed(NORMSPEED, NORMSPEED);
-			}	
-			else if(FireL < 65)
-			{
-				setSpeed(NORMSPEED, NORMSPEED-150);
-			}	
-			else if(FireR < 65)
-			{
-				setSpeed(NORMSPEED-150, NORMSPEED);
+				fireState = 4;
 			}
-			else if(((FireL<250) && (FireL>0)) || ((FireR<250) && (FireR>0)))
+			else if(IR3 < 11)
 			{
-				setSpeed(NORMSPEED-150, NORMSPEED-150);
+				setSpeed(80,100);
+				fireState = 5;
+			}	
+			else if(IR1 < 15)
+			{
+				setSpeed(NORMSPEED-100, NORMSPEED-270);
+				fireState = 6;
 			}
-			//modified by adding
-			else if(FireM < fireVal)
+			else if(FireM > (lowestTemp+2))
 			{
-				setSpeed(NORMSPEED-200, NORMSPEED-200);
-				if(fireCount == 3)
+				stateOfMarvin = 198;
+				//setSpeed(NORMSPEED-100, -NORMSPEED+100);
+				//while(FireM > (lowestTemp + 2))
+				//{
+				//	AD1CON1bits.ASAM = 1;
+				//	while(AD1CON1bits.ASAM && _AD1IF);
+				//}
+				setSpeed(0,0);
+				fireState = 7;
+			}
+			else if((FireM < 40) && (FireM > 0))
+			{
+				if(((FireL < 150) && (FireL > 0)) && ((FireR < 150) && (FireR > 0)))
 				{
-					fireVal = fireVal+50;
-					fireSpin = 0;
-				}	
-			}		
+					setSpeed(NORMSPEED, NORMSPEED);
+				}
+				else if((FireL < 150) && (FireL > 0))
+				{
+					setSpeed(NORMSPEED-90, NORMSPEED-210);
+				}
+				else if((FireR < 150) && (FireR > 0))
+				{
+					setSpeed(NORMSPEED-210, NORMSPEED-90);
+				}
+				else
+				{
+					setSpeed(50, 50);
+				}
+				fireState = 8;
+			}	
 			else
 			{
-				setSpeed(NORMSPEED-150, -NORMSPEED+150);
-				if(leftCount > 470)
-				{
-					fireSpin++;
-					resetCount();
-				}	
+				setSpeed(NORMSPEED-150, NORMSPEED-150);
+				fireState = 9;
 			}
-			if(fireCount > 5)
+			
+			if(!(FireM > lowestTemp))
+			{
+				lowestTemp = FireM;
+			}	
+//			else if ((FireL < 65) && (FireR < 65))
+//			{
+//				setSpeed(NORMSPEED, NORMSPEED);
+//				fireState = 4;
+//			}	
+//			else if((FireL < 65) && (FireL>0))
+//			{
+//				setSpeed(NORMSPEED, NORMSPEED-150);
+//				fireState = 5;
+//			}	
+//			else if((FireR < 65) && (FireL>0))
+//			{
+//				setSpeed(NORMSPEED-150, NORMSPEED);
+//				fireState = 6;
+//			}
+//			else if(((FireL<250) && (FireL>0)) || ((FireR<250) && (FireR>0)))
+//			{
+//				if(((FireL<250) && (FireL>0)) && ((FireR<250) && (FireR>0)))
+//				{
+//					setSpeed(NORMSPEED-150, NORMSPEED-150);
+//				}
+//				else if((FireL<250) && (FireL>0))
+//				{
+//					setSpeed(NORMSPEED-150, -NORMSPEED+150);
+//				}
+//				else if((FireR<250) && (FireR>0))
+//				{
+//					setSpeed(-NORMSPEED+150, NORMSPEED-150);
+//				}
+//				fireState = 7;
+//			}
+//			else if((FireM < 45) && (FireM > 0))
+//			{
+//				fireState = 20;
+//				while((FireL > 760) || (FireR > 760))
+//				{
+//					setSpeed(NORMSPEED-150, -NORMSPEED+150);
+//					AD1CON1bits.ASAM = 1;
+//					while(AD1CON1bits.ASAM && _AD1IF);
+//				}
+//			}	
+//			else if((FireL > FireR) && ((FireL/FireR) > 1))
+//			{
+//				setSpeed(-NORMSPEED+200, NORMSPEED-200);
+//				fireState = 8;
+//			}
+//			else if((FireL < FireR) && ((FireR/FireL) > 1))
+//			{
+//				setSpeed(NORMSPEED-200, -NORMSPEED+200);
+//				fireState = 9;
+//			}
+//			else if(((FireL - FireR) > 150) && ((FireL - FireR) < 300))
+//			{
+//				setSpeed(-NORMSPEED+200, NORMSPEED-200);
+//				fireState = 8;
+//			}
+//			else if(((FireR - FireL) > 150) && ((FireR - FireL) < 300))
+//			{
+//				setSpeed(NORMSPEED-200, -NORMSPEED+200);
+//				fireState = 9;
+//			}		
+//			//modified by adding
+//			else if((FireM < fireVal) && (FireM > 0))
+//			{	
+//				setSpeed(NORMSPEED-200, NORMSPEED-200);
+//				fireState = 10;
+//				if(fireSpin == 1)
+//				{
+//					fireVal = fireVal+2;
+//					fireSpin = 0;
+//					fireState = 11;
+//				}
+//				
+//			}
+//			else
+//			{
+//				setSpeed(NORMSPEED-150, -NORMSPEED+150);
+//				if(leftCount > 470)
+//				{
+//					fireSpin++;
+//					resetCount();
+//				}
+//				fireState = 12;
+//			}
+			if(fireCount > 10)
 			{
 				stateOfMarvin = 201;
 				fireCount = 0;
-			}	
+			}
+//			if(fireSpin == 1)
+//			{
+//				fireVal = fireVal+3;
+//				fireSpin = 0;
+//				fireState = 11;
+//			}	
 		}
 		
 		else if(stateOfMarvin == 201)
@@ -516,6 +695,19 @@ int main(void)
 			//modified by adding to double check flame
 			else
 			{
+				setSpeed(0,0);
+				resetCount();
+				setSpeed(-90, -90);
+				while(leftCount < 100)
+				{
+					if(IR4 < 20)
+					{
+						setSpeed(0,0);
+						break;
+					}
+					AD1CON1bits.ASAM = 1;
+					while(AD1CON1bits.ASAM && _AD1IF);
+				}		
 				stateOfMarvin = 203;
 				setSpeed(0,0);
 				resetCount();
@@ -538,14 +730,32 @@ int main(void)
 			else
 			{
 				setSpeed(0,0);
-				if((roomCount == 1) || (roomCount == 3) || (roomCount == 5))
+				if(roomCount == 1)
 				{
+					setSpeed(0,0);
+					resetCount();
+					setSpeed(NORMSPEED-100, NORMSPEED-100);
+					while((IR1 > 15) && (IR2 > 8))
+					{
+						AD1CON1bits.ASAM = 1;
+						while(AD1CON1bits.ASAM && _AD1IF);
+					}	
+					setSpeed(0,0);
+					stateOfMarvin = 210;
+				}
+				else if((roomCount == 3) || (roomCount == 5) || (roomCount == 7))
+				{
+					setSpeed(0,0);
+					resetCount();
+					setSpeed(NORMSPEED-100, NORMSPEED-100);
+					while((IR1 > 15) && (IR2 > 8))
+					{
+						AD1CON1bits.ASAM = 1;
+						while(AD1CON1bits.ASAM && _AD1IF);
+					}	
+					setSpeed(0,0);
 					stateOfMarvin = 204;
 					roomCount += 10;
-				}
-				else
-				{
-					stateOfMarvin = 210;
 				}
 				resetCount();
 			}		
@@ -584,12 +794,12 @@ int main(void)
 			if(lightCount > 30)
 			{
 				lightCount = 0;
-				roomCount++;
-				if(roomCount != 16)
+				roomCount--;
+				if(roomCount != 12)
 				{
 					stateOfMarvin = 204;
 				}
-				else if(roomCount == 16)
+				else if(roomCount == 12)
 				{
 					setSpeed(0,0);
 					resetCount();
@@ -637,7 +847,7 @@ int main(void)
 				setSpeed(0,0);
 				resetCount();
 				setSpeed(-100, 100);
-				while(leftCount < 50);
+				while(leftCount < 20);
 				setSpeed(0,0);
 				stateOfMarvin = 211;
 				lightCount = 0;
@@ -647,7 +857,7 @@ int main(void)
 		//after white front drive straight til front IR
 		else if(stateOfMarvin == 211)
 		{
-			if(IR1 > 17)
+			if(IR1 > 15)
 			{
 				setSpeed(NORMSPEED-100, NORMSPEED-100);
 			}
@@ -663,8 +873,13 @@ int main(void)
 			setSpeed(0,0);
 			resetCount();
 			setSpeed(0,0);
-			stateOfMarvin = 0;
+			stateOfMarvin = 226;
 			roomCount = 0;
+		}
+		//stop moving state
+		else if(stateOfMarvin == 226)
+		{
+			setSpeed(0,0);
 		}	
 		//test state
 		else if(stateOfMarvin == 250)

@@ -10,7 +10,7 @@ extern unsigned int LightF, LightR, Sound;
 extern unsigned int speedL, speedR;
 extern unsigned int leftCount, rightCount;
 extern unsigned int stateOfMarvin;
-extern unsigned int roomCount;
+extern unsigned int fireState;
 
 unsigned char transmit[MAXTRANSMIT];
 unsigned char transmitCount = 0;
@@ -97,8 +97,8 @@ void writeUart()
 	transmit[23] = (char)LightF;
 	transmit[24] = (char)(LightR>>8);
 	transmit[25] = (char)LightR;
-	transmit[26] = (char)(roomCount>>8);
-	transmit[27] = (char)roomCount;
+	transmit[26] = (char)(fireState>>8);
+	transmit[27] = (char)fireState;
 	transmit[28] = (char)((OC1R/200)>>8);
 	transmit[29] = (char)(OC1R/200);
 	transmit[30] = (char)(leftCount>>8);
